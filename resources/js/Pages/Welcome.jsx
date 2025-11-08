@@ -4,6 +4,7 @@ export default function Welcome({ auth }) {
     return (
         <>
             <Head title="BonAppétit Web - Restaurante Elegante">
+                <link rel="icon" type="image/png" href="/images/BonAppétit-logo.png" />
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
                 <link href="https://fonts.googleapis.com/css2?family=Ballet:opsz@16..72&display=swap" rel="stylesheet" />
@@ -28,7 +29,10 @@ export default function Welcome({ auth }) {
 
                 <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-white/10 transition-all duration-300">
                     <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center px-4 sm:px-6 py-4">
-                        <div className="text-white text-xl sm:text-2xl font-serif tracking-wider">BonAppétit</div>
+                        <div className="flex items-center gap-3">
+                            <img src="/images/BonAppétit-logo.png" alt="BonAppétit Logo" className="h-8 sm:h-10" />
+                            <span className="text-white text-xl sm:text-2xl font-serif tracking-wider">BonAppétit</span>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                             {auth.user ? (
                                 <Link
