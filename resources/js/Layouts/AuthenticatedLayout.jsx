@@ -36,6 +36,18 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Recetas
                                 </NavLink>
+                                <NavLink
+                                    href={route('favoritas')}
+                                    active={route().current('favoritas')}
+                                >
+                                    Mis Favoritas
+                                </NavLink>
+                                <NavLink
+                                    href={route('reservaciones')}
+                                    active={route().current('reservaciones')}
+                                >
+                                    Reservaciones
+                                </NavLink>
                             </div>
                         </div>
 
@@ -145,6 +157,18 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('recetas')}
                         >
                             Recetas
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('favoritas')}
+                            active={route().current('favoritas')}
+                        >
+                            Mis Favoritas
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('reservaciones')}
+                            active={route().current('reservaciones')}
+                        >
+                            Reservaciones
                         </ResponsiveNavLink>
                     </div>
 

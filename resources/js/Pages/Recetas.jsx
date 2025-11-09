@@ -34,7 +34,9 @@ export default function Recetas() {
             }
             
             const response = await axios.get(url);
-            setRecetas(response.data.results || response.data.recipes || []);
+            // Manejar la nueva estructura de respuesta con success y data
+            const data = response.data.success ? response.data.data : response.data;
+            setRecetas(data.results || data.recipes || []);
         } catch (error) {
             console.error('Error al cargar recetas:', error);
             setRecetas([]);
@@ -103,14 +105,39 @@ export default function Recetas() {
                                             alt={receta.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await axios.post('/api/favoritas', {
+                                                        receta_id: receta.id,
+                                                        nombre: receta.title,
+                                                        imagen: receta.image,
+                                                        tiempo: `${receta.readyInMinutes || 30} min`
+                                                    });
+                                                    alert('¡Agregado a favoritas!');
+                                                } catch (error) {
+                                                    if (error.response?.status === 409) {
+                                                        alert('Ya está en favoritas');
+                                                    } else {
+                                                        alert('Error al agregar a favoritas');
+                                                    }
+                                                }
+                                            }}
+                                            className="absolute top-4 right-4 bg-black/70 hover:bg-yellow-600 text-yellow-500 hover:text-black p-3 rounded-full transition-all text-2xl"
+                                        >
+                                            ★
+                                        </button>
                                     </div>
                                     <div className="p-6 text-center">
                                         <h3 className="font-serif text-lg text-yellow-500 mb-4 uppercase tracking-wider line-clamp-2">
                                             {receta.title}
                                         </h3>
-                                        <button className="text-yellow-600 hover:text-yellow-400 font-medium text-sm uppercase tracking-wider transition-colors border-b border-yellow-600/50 hover:border-yellow-400 pb-1">
+                                        <a 
+                                            href={`/receta/${receta.id}`}
+                                            className="text-yellow-600 hover:text-yellow-400 font-medium text-sm uppercase tracking-wider transition-colors border-b border-yellow-600/50 hover:border-yellow-400 pb-1"
+                                        >
                                             View Recipe
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             ))}

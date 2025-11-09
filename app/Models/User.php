@@ -45,4 +45,28 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Relación con favoritas
+     */
+    public function favoritas()
+    {
+        return $this->hasMany(Favorita::class);
+    }
+
+    /**
+     * Relación con valoraciones
+     */
+    public function valoraciones()
+    {
+        return $this->hasMany(Valoracion::class);
+    }
+
+    /**
+     * Relación con reservaciones
+     */
+    public function reservaciones()
+    {
+        return $this->hasMany(Reservacion::class);
+    }
 }
