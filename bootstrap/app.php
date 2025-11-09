@@ -18,13 +18,17 @@ return Application::configure(basePath: dirname(__DIR__))
             // \App\Http\Middleware\SecurityHeaders::class, // Desactivado temporalmente
         ]);
 
-        $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        // API usa las mismas sesiones que web
+        $middleware->api(append: [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
         ]);
 
         // Alias de middleware personalizados
         $middleware->alias([
             'validate.apikey' => \App\Http\Middleware\ValidateApiKey::class,
+            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

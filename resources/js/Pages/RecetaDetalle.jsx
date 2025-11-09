@@ -93,14 +93,7 @@ export default function RecetaDetalle({ recetaId }) {
     }
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center gap-3">
-                    <img src="/images/BonAppétit-logo.png" alt="BonAppétit" className="h-8" />
-                    <h2 className="font-serif text-2xl text-gray-800 tracking-wider">Detalle de Receta</h2>
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title={receta?.title || 'Receta'} />
 
             <div className="py-12 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen">

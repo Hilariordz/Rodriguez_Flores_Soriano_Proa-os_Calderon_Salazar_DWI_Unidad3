@@ -1,0 +1,734 @@
+openapi: 3.0.0
+info:
+  title: BonAppétit Web API
+  description: API completa para gestión de recetas, favoritas, valoraciones y reservaciones
+  version: 1.0.0
+  contact:
+    name: BonAppétit Team
+    email: api@bonappetit.com
+
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Servidor de desarrollo
+
+tags:
+  - name: Recetas
+    description: Endpoints para búsqueda y gestión de recetas (Spoonacular)
+  - name: Favoritas
+    description: CRUD de recetas favoritas del usuario
+  - name: Valoraciones
+    description: Sistema de valoración de recetas (1-5 estrellas)
+  - name: Reservaciones
+    description: Gestión de reservaciones de restaurante
+  - name: Usuario
+    description: Gestión de perfil y cuenta de usuario
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error al procesar la solicitud
+          
+    ValidationError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error de validación
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+              
+    Favorita:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        receta_id:
+          type: integer
+          example: 633352
+        nombre:
+          type: string
+          example: Tacos al Pastor
+        imagen:
+          type: string
+          example: https://img.spoonacular.com/recipes/633352-312x231.jpg
+        tiempo:
+          type: string
+          example: 30 min
+        descripcion:
+          type: string
+          example: Deliciosos tacos mexicanos
+        precio:
+          type: string
+          example: $120
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+          
+    Valoracion:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        receta_id:
+          type: integer
+          example: 633352
+        puntuacion:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        created_at:
+          type: string
+          format: date-time
+          
+    Reservacion:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        nombre_cliente:
+          type: string
+          example: Juan Pérez
+        email:
+          type: string
+          format: email
+          example: juan@example.com
+        telefono:
+          type: string
+          example: +52 55 1234 5678
+        numero_personas:
+          type: integer
+          minimum: 1
+          maximum: 20
+          example: 4
+        fecha:
+          type: string
+          format: date
+          example: 2024-11-15
+        hora:
+          type: string
+          format: time
+          example: "19:30"
+        notas:
+          type: string
+          example: Mesa cerca de la ventana
+        estado:
+          type: string
+          enum: [pendiente, confirmada, cancelada]
+          example: pendiente
+        created_at:
+          type: string
+          format: date-time
+
+paths:
+  # RECETAS
+  /recetas/buscar:
+    get:
+      tags:
+        - Recetas
+      summary: Buscar recetas
+      description: Busca recetas por término de búsqueda usando la API de Spoonacular
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+          description: Término de búsqueda
+          example: tacos
+        - name: number
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 8
+          description: Número de resultados
+      responses:
+        '200':
+          description: Búsqueda exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          type: object
+                      totalResults:
+                        type: integer
+        '422':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+                
+  /recetas/detalle/{id}:
+    get:
+      tags:
+        - Recetas
+      summary: Obtener detalle de receta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la receta
+      responses:
+        '200':
+          description: Detalle obtenido
+        '404':
+          description: Receta no encontrada
+          
+  /recetas/aleatorias:
+    get:
+      tags:
+        - Recetas
+      summary: Obtener recetas aleatorias
+      parameters:
+        - name: number
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 6
+      responses:
+        '200':
+          description: Recetas obtenidas
+          
+  /recetas/categoria/{tipo}:
+    get:
+      tags:
+        - Recetas
+      summary: Obtener recetas por categoría
+      parameters:
+        - name: tipo
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [breakfast, lunch, dinner, snack, dessert]
+          description: Tipo de comida
+      responses:
+        '200':
+          description: Recetas obtenidas
+        '400':
+          description: Tipo inválido
+
+  # FAVORITAS
+  /favoritas:
+    get:
+      tags:
+        - Favoritas
+      summary: Listar favoritas del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de favoritas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Favorita'
+                  total:
+                    type: integer
+        '401':
+          description: No autenticado
+          
+    post:
+      tags:
+        - Favoritas
+      summary: Agregar receta a favoritas
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - receta_id
+                - nombre
+              properties:
+                receta_id:
+                  type: integer
+                  example: 633352
+                nombre:
+                  type: string
+                  example: Tacos al Pastor
+                imagen:
+                  type: string
+                  example: https://...
+                tiempo:
+                  type: string
+                  example: 30 min
+                descripcion:
+                  type: string
+                precio:
+                  type: string
+      responses:
+        '201':
+          description: Favorita creada
+        '409':
+          description: Ya existe en favoritas
+        '422':
+          description: Error de validación
+          
+  /favoritas/{id}:
+    get:
+      tags:
+        - Favoritas
+      summary: Obtener una favorita
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Favorita encontrada
+        '404':
+          description: No encontrada
+          
+    put:
+      tags:
+        - Favoritas
+      summary: Actualizar favorita
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                imagen:
+                  type: string
+                tiempo:
+                  type: string
+                descripcion:
+                  type: string
+                precio:
+                  type: string
+      responses:
+        '200':
+          description: Actualizada
+        '404':
+          description: No encontrada
+          
+    delete:
+      tags:
+        - Favoritas
+      summary: Eliminar favorita
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminada
+        '404':
+          description: No encontrada
+
+  # VALORACIONES
+  /valoraciones/{recetaId}/promedio:
+    get:
+      tags:
+        - Valoraciones
+      summary: Obtener promedio de valoraciones
+      parameters:
+        - name: recetaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Promedio obtenido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      receta_id:
+                        type: integer
+                      promedio:
+                        type: number
+                        format: float
+                        example: 4.5
+                      total_valoraciones:
+                        type: integer
+                        example: 42
+                        
+  /valoraciones:
+    post:
+      tags:
+        - Valoraciones
+      summary: Crear o actualizar valoración
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - receta_id
+                - puntuacion
+              properties:
+                receta_id:
+                  type: integer
+                  example: 633352
+                puntuacion:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  example: 5
+      responses:
+        '201':
+          description: Valoración guardada
+        '422':
+          description: Error de validación
+
+  # RESERVACIONES
+  /reservaciones:
+    get:
+      tags:
+        - Reservaciones
+      summary: Listar reservaciones del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de reservaciones
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reservacion'
+                      
+    post:
+      tags:
+        - Reservaciones
+      summary: Crear nueva reservación
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre_cliente
+                - email
+                - telefono
+                - numero_personas
+                - fecha
+                - hora
+              properties:
+                nombre_cliente:
+                  type: string
+                  maxLength: 255
+                  example: Juan Pérez
+                email:
+                  type: string
+                  format: email
+                  example: juan@example.com
+                telefono:
+                  type: string
+                  maxLength: 20
+                  example: +52 55 1234 5678
+                numero_personas:
+                  type: integer
+                  minimum: 1
+                  maximum: 20
+                  example: 4
+                fecha:
+                  type: string
+                  format: date
+                  example: 2024-11-15
+                hora:
+                  type: string
+                  format: time
+                  example: "19:30"
+                notas:
+                  type: string
+                  maxLength: 500
+      responses:
+        '201':
+          description: Reservación creada
+        '422':
+          description: Error de validación
+          
+  /reservaciones/{id}:
+    put:
+      tags:
+        - Reservaciones
+      summary: Actualizar reservación
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre_cliente:
+                  type: string
+                email:
+                  type: string
+                telefono:
+                  type: string
+                numero_personas:
+                  type: integer
+                fecha:
+                  type: string
+                hora:
+                  type: string
+                notas:
+                  type: string
+      responses:
+        '200':
+          description: Actualizada
+        '404':
+          description: No encontrada
+          
+    delete:
+      tags:
+        - Reservaciones
+      summary: Eliminar reservación
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminada
+        '404':
+          description: No encontrada
+          
+  /reservaciones/{id}/cancelar:
+    put:
+      tags:
+        - Reservaciones
+      summary: Cancelar reservación
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cancelada
+        '400':
+          description: Ya está cancelada
+        '404':
+          description: No encontrada
+
+  # USUARIO
+  /user/me:
+    get:
+      tags:
+        - Usuario
+      summary: Obtener información del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Información del usuario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      created_at:
+                        type: string
+                        
+  /user/profile:
+    put:
+      tags:
+        - Usuario
+      summary: Actualizar perfil
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Perfil actualizado
+          
+  /user/password:
+    put:
+      tags:
+        - Usuario
+      summary: Cambiar contraseña
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - new_password
+                - new_password_confirmation
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                new_password:
+                  type: string
+                  format: password
+                new_password_confirmation:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Contraseña actualizada
+        '400':
+          description: Contraseña actual incorrecta
+          
+  /user/stats:
+    get:
+      tags:
+        - Usuario
+      summary: Obtener estadísticas del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Estadísticas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      favoritas:
+                        type: integer
+                      valoraciones:
+                        type: integer
+                      reservaciones:
+                        type: integer

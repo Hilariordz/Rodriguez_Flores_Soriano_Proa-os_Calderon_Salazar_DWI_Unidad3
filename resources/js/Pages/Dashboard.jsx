@@ -8,14 +8,7 @@ export default function Dashboard({ recetas = [] }) {
     const [favoritas, setFavoritas] = useState([]);
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center gap-3">
-                    <img src="/images/BonAppétit-logo.png" alt="BonAppétit" className="h-8" />
-                    <h2 className="font-serif text-2xl text-gray-800 tracking-wider">Buscador de Recetas</h2>
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title="Dashboard">
                 <link rel="icon" type="image/png" href="/images/BonAppétit-logo.png" />
             </Head>

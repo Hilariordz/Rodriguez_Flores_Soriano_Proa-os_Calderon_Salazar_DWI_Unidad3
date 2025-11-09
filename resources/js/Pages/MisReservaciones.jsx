@@ -93,26 +93,29 @@ export default function MisReservaciones() {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <img src="/images/BonAppétit-logo.png" alt="BonAppétit" className="h-8" />
-                        <h2 className="font-serif text-2xl text-gray-800 tracking-wider">Mis Reservaciones</h2>
-                    </div>
-                    <button
-                        onClick={() => setMostrarFormulario(!mostrarFormulario)}
-                        className="px-6 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-500"
-                    >
-                        {mostrarFormulario ? 'Cancelar' : '+ Nueva Reservación'}
-                    </button>
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title="Mis Reservaciones" />
 
             <div className="py-12 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    
+                    {/* Header con botón */}
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-4xl md:text-5xl font-serif text-yellow-500 tracking-wide">
+                                Mis Reservaciones
+                            </h1>
+                            <p className="text-gray-300 text-lg mt-2">
+                                {reservaciones.length} {reservaciones.length === 1 ? 'reservación' : 'reservaciones'}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setMostrarFormulario(!mostrarFormulario)}
+                            className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-medium rounded hover:from-yellow-400 hover:to-yellow-500"
+                        >
+                            {mostrarFormulario ? 'Cancelar' : '+ Nueva Reservación'}
+                        </button>
+                    </div>
                     
                     {/* Formulario de Nueva Reservación */}
                     {mostrarFormulario && (
@@ -205,15 +208,6 @@ export default function MisReservaciones() {
                     )}
 
                     {/* Lista de Reservaciones */}
-                    <div className="text-center mb-8">
-                        <h1 className="text-4xl md:text-5xl font-serif text-yellow-500 mb-4 tracking-wide">
-                            Mis Reservaciones
-                        </h1>
-                        <p className="text-gray-300 text-lg">
-                            {reservaciones.length} {reservaciones.length === 1 ? 'reservación' : 'reservaciones'}
-                        </p>
-                    </div>
-
                     {loading ? (
                         <div className="text-center py-20">
                             <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-yellow-500"></div>

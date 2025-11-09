@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -68,5 +69,21 @@ class User extends Authenticatable
     public function reservaciones()
     {
         return $this->hasMany(Reservacion::class);
+    }
+
+    /**
+     * Verificar si el usuario es admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Verificar si el usuario es usuario normal
+     */
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
     }
 }

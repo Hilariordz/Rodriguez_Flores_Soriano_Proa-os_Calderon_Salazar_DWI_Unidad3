@@ -60,4 +60,19 @@ Route::get('/buscar', function (Illuminate\Http\Request $request) {
     return Inertia::render('Dashboard', ['recetas' => $recetas]);
 })->middleware(['auth', 'verified']);
 
+// Rutas de Administrador
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Admin/Dashboard');
+    })->name('admin.dashboard');
+    
+    Route::get('/reservaciones', function () {
+        return Inertia::render('Admin/Reservaciones');
+    })->name('admin.reservaciones');
+    
+    Route::get('/menu', function () {
+        return Inertia::render('Admin/Menu');
+    })->name('admin.menu');
+});
+
 require __DIR__.'/auth.php';
