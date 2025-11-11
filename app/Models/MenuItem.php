@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+//Clase utilizada
 class MenuItem extends Model
 {
     protected $fillable = [
